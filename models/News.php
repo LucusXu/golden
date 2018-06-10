@@ -31,4 +31,22 @@ class NewsModel extends ModelBase {
             return false;
         }
     }
+
+    public function addArticle($uid, $content) {
+        $data = [
+            'uid' => $uid,
+            'content' => $content,
+        ];
+
+        $onDup = [
+            "uid" => $uid,
+            "content" => $content,
+        ];
+        $ret = $this->db->insert($this->_tableName, $data, null, $onDup);
+        if (false === $ret) {
+            Log::warning("connect db fail");
+            return false;
+        }
+        return $this->db->getInsertID();
+    }
 }
