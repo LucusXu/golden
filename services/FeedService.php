@@ -29,27 +29,25 @@ class FeedService {
     }
 
     public function getFeedList(&$next_id, $user = null) {
-        $limit = 50;
-        $feeds = $this->_newsObj->getNews($next_id, $limit);
+        $limit = 2;
+        $feeds = $this->_newsObj->getArticleList($next_id, $limit);
         if (!$feeds) {
             return null;
         }
 
-        $i = 1;
-        $new_feed = [];
-        foreach ($feeds as $piece) {
-            if ($i > $limit) {
-                break;
-            }
-            $new_feed[] = $piece;
-            $i ++;
-        }
         $data = [
-            "feed" => $new_feed,
+            "feed" => $feeds,
             "has_more" => false,
         ];
-        if (count($feeds) > $limit) {
+        $count = $this->_newsObj->nextCount($next_id);
+        if ($count > $limit) {
             $data['has_more'] = true;
+        }
+
+        foreach ($feeds as $one) {
+            if ($one['id'] > $next_id) {
+                $next_id = $one['id'];
+            }
         }
         return Util::returnSucc($data);
     }
