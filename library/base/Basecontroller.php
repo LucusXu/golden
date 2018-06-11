@@ -31,45 +31,6 @@ class Basecontroller extends CommonServer {
         Log::addNotice('os.platform', $this->header('PLATFORM'));
         Log::addNotice('version.no', $this->header('VERSION'));
         Log::addNotice('version.name', $this->header('VERSION-NAME'));
-        if($this->isCheckSign){
-            $this->checkSign();
-        }
-    }
-
-    public function checkSign() {
-        //TODO 强制升级后 去掉版本控制
-        if ($this->request->isPost()) {
-            $vesion = $this->header('VERSION-NAME');
-            $vesion = preg_filter('/\./', '', $vesion);
-            $vesion = (int) $vesion;
-
-            if ($vesion >= 125) {
-                $sign = $this->header('sign');
-                $sign = $sign ? $sign : $this->getParam('sign');
-
-                $legal = false;
-
-                if (!empty($sign) && $this->uuid) {
-
-                    $uri = $_SERVER['REQUEST_URI'];
-
-                    if (false !== $pos = strpos($uri, '?')) {
-                        $uri = substr($uri, 0, $pos);
-                    }
-
-                    $timestap = $this->header('time');
-                    $timestap = $timestap ? $timestap : $this->getParam('time');
-
-                    $legal = Utils::verify($this->uuid, $uri, $_POST, $timestap, $sign);
-                }
-
-                if (!$legal) {
-                    Log::warning('check:sign:error:uuid:' . $this->uuid);
-                    $this->returnResult(ErrorDefine::ERRNO_FAIL, '签名失败');
-                }
-
-            }
-        }
     }
 
     /**
@@ -80,8 +41,7 @@ class Basecontroller extends CommonServer {
      * @param  boolean $tag  [description]
      * @return [type]        [description]
      */
-    public function getParam($name, $tag = false)
-    {
+    public function getParam($name, $tag = false) {
         if ($this->getRequest()->isPost()) {
             $val = $this->getRequest()->getPost($name);
         } elseif (!in_array(str_replace('Action', '', $this->getRequest()->getActionName()),
@@ -317,7 +277,7 @@ class Basecontroller extends CommonServer {
      * 获取用户的信息
      * @return bool
      */
-    protected function getUserInfo($raw=false) {
+    protected function getUserInfo($raw = false) {
         if (!$this->authToken) {
             return false;
         }
