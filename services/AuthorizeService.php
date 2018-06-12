@@ -45,7 +45,7 @@ class AuthorizeService {
     }
 
     public function isLogin($accessToken) {
-        $ret = $this->auth->findAuthByToken($accessToken);
+        $ret = $this->_auth->findAuthByToken($accessToken);
         return $ret;
     }
 }
