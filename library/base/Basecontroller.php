@@ -1,9 +1,8 @@
 <?php
-/*
-* @desc
-* @author Lucus
-* @2017年8月3日
-*/
+/**
+ * @author Lucus
+ * @2017年8月3日
+ */
 
 namespace library\base;
 
@@ -21,30 +20,22 @@ class Basecontroller extends CommonServer {
     protected $authToken = '';
     protected $uuid = '';
     protected static $post = [];
-    public $isCheckSign = true;
 
     public function init() {
         $this->request = $this->getRequest();
         $this->authToken = $this->header('AUTHORIZATION');
         $this->uuid = $this->header('UUID');
-        Log::addNotice('uuid.md5', empty($this->uuid)? '' : md5($this->uuid));
-        Log::addNotice('os.platform', $this->header('PLATFORM'));
-        Log::addNotice('version.no', $this->header('VERSION'));
-        Log::addNotice('version.name', $this->header('VERSION-NAME'));
     }
 
     /**
      * 获取request请求参数
-     *
-     * @param  [type]  $name [descrip
-     * tion]
-     * @param  boolean $tag  [description]
-     * @return [type]        [description]
      */
     public function getParam($name, $tag = false) {
         if ($this->getRequest()->isPost()) {
             $val = $this->getRequest()->getPost($name);
-        } elseif (!in_array(str_replace('Action', '', $this->getRequest()->getActionName()),
+        } else if (!in_array(str_replace('Action',
+            '',
+            $this->getRequest()->getActionName()),
             static::$post)) {
             $val = $this->getRequest()->getQuery($name);
         } else {
@@ -60,19 +51,14 @@ class Basecontroller extends CommonServer {
                 $val = $this->_filterParam($val, $tag);
             }
         }
-        Log::addNotice('param.'.$name, isset($val)?$val:'');
+        Log::addNotice('param.' . $name, isset($val) ? $val : '');
         return $val;
     }
 
     /**
      * 过滤request数据 (可根据需求扩展过滤规则)
-     *
-     * @param  string  $value [description]
-     * @param  boolean $tag   [description]
-     * @return string         [description]
      */
-    private function _filterParam($value, $tag = false)
-    {
+    private function _filterParam($value, $tag = false) {
         if ($tag) {
             $value = trim($value);
         } else {
@@ -81,16 +67,14 @@ class Basecontroller extends CommonServer {
         return $value;
     }
 
-    protected function logParams($params)
-    {
+    protected function logParams($params) {
         foreach ($params as $key => $value) {
-            Log::addNotice('param.'.$key, $value);
+            Log::addNotice('param.' . $key, $value);
         }
     }
 
     // 输出 json 结果
-    public function outputJson($arrRet, $status = 200)
-    {
+    public function outputJson($arrRet, $status = 200) {
         header('Content-Type:application/json;charset=utf-8', true, $status);
         echo json_encode($arrRet, JSON_UNESCAPED_UNICODE);
     }
@@ -98,14 +82,12 @@ class Basecontroller extends CommonServer {
     /**
      * @param int $errno
      * @param string $errmsg
-     * @param string $data
+     * @param array $data
      * @param bool $showJson
      * @return array|void
      */
-    protected function returnResult($errno = 0, $errmsg = '', $data = '', $showJson = true)
-    {
+    protected function returnResult($errno = 0, $errmsg = '', $data = '', $showJson = true) {
         header('Content-Type:application/json');
-
         $errno = intval($errno);
         $errmsg = $errmsg ? $errmsg : ErrorDefine::getMsg($errno);
         $data   = $data ? $data : null;
@@ -123,88 +105,74 @@ class Basecontroller extends CommonServer {
         return $this->output($data, $errno, $errmsg);
     }
 
-    protected function filterIntArr(array $arr)
-    {
+    protected function filterIntArr(array $arr) {
         return array_filter(array_unique(array_map('intval', $arr)));
     }
 
-    protected function getIntSetParam($name)
-    {
+    protected function getIntSetParam($name) {
         $vals = $this->get($name);
-        if(empty($vals)){
+        if (empty($vals)) {
             return [];
         }
         $vals = explode(',', $vals);
         return array_filter(array_unique(array_map('intval', $vals)));
     }
 
-    protected function postIntSetParam($name)
-    {
+    protected function postIntSetParam($name) {
         $vals = $this->post($name);
-        if(empty($vals)){
+        if (empty($vals)) {
             return [];
         }
         $vals = explode(',', $vals);
         return array_filter(array_unique(array_map('intval', $vals)));
     }
 
-    protected function get($name, $default = '')
-    {
+    protected function get($name, $default = '') {
         $val = $this->getRequest()->getQuery($name, $default);
-        Log::addNotice('param.'.$name, str_replace(array("\r\n", "\n", "\r"), "", isset($val)?$val:''));
+        Log::addNotice('param.' . $name, str_replace(array("\r\n", "\n", "\r"), "", isset($val) ? $val : ''));
         return $val;
     }
 
-    protected function post($name, $default = '')
-    {
+    protected function post($name, $default = '') {
         $val = $this->getRequest()->getPost($name, $default);
-        Log::addNotice('param.'.$name, str_replace(array("\r\n", "\n", "\r"), "", isset($val)?$val:''));
+        Log::addNotice('param.' . $name, str_replace(array("\r\n", "\n", "\r"), "", isset($val) ? $val : ''));
         return $val;
     }
 
-    protected function param($name, $default = '')
-    {
+    protected function param($name, $default = '') {
         $val = $this->getRequest()->getParam($name, $default);
-        Log::addNotice('param.'.$name, str_replace(array("\r\n", "\n", "\r"), "", isset($val)?$val:''));
+        Log::addNotice('param.' . $name, str_replace(array("\r\n", "\n", "\r"), "", isset($val) ? $val: ''));
         return $val;
     }
 
-    protected function header($name, $default = '')
-    {
+    protected function header($name, $default = '') {
         $name = str_replace('-', '_', strtoupper($name));
-        $val = Arr::get($_SERVER, 'HTTP_'.$name, $default);
-//        Log::addNotice($name, $val, 'header');
+        $val = Arr::get($_SERVER, 'HTTP_' . $name, $default);
         return $val;
     }
 
-    protected function gets()
-    {
+    protected function gets() {
         return $_GET;
     }
 
-    protected function posts()
-    {
+    protected function posts() {
         return $_POST;
     }
 
-    protected function cookie($name, $default = '')
-    {
+    protected function cookie($name, $default = '') {
         return $this->getRequest()->getCookie($name, $default);
     }
 
 
-    protected function getIntParam($key, $default = 0)
-    {
+    protected function getIntParam($key, $default = 0) {
         return (int)$this->get($key, $default);
     }
 
-    protected function postIntParam($key, $default = 0)
-    {
+    protected function postIntParam($key, $default = 0) {
         return (int)$this->post($key, $default);
     }
 
-    protected function getTimestampParam($key)
-    {
+    protected function getTimestampParam($key) {
         $date_time = $this->get($key);
         if (empty($date_time)) {
             return 0;
@@ -212,8 +180,7 @@ class Basecontroller extends CommonServer {
         return strtotime($date_time);
     }
 
-    protected function getDatetimeParam($key, $default = '')
-    {
+    protected function getDatetimeParam($key, $default = '') {
         $date_time = $this->get($key, $default);
         if (empty($date_time)) {
             return '';
@@ -227,50 +194,46 @@ class Basecontroller extends CommonServer {
         if ($pos !== false) {
             $host = substr($host, 0, $pos);
         }
-        $auth = openssl_encrypt("$uid:".time(), 'aes-256-cbc', 'Dong@Qiu&*', 0, 'aZdy0');
-        $check = hash_hmac('sha256', $auth . 'dongqiudi.com', 'cookieAuth');
-        if (strstr($host, 'dqdgame.com')) {
-            $host = 'dqdgame.com';
+        $auth = openssl_encrypt("$uid:" . time(), 'aes-256-cbc', 'Shui@Bit&*', 0, 'aZdy0');
+        $check = hash_hmac('sha256', $auth . 'shuibit.com', 'cookieAuth');
+        if (strstr($host, 'shuibit.com')) {
+            $host = 'shuibit.com';
         }
-        setcookie('_yyc', "$auth:$check", time()+86400*30, '/', $host);
+        setcookie('_sbit', "$auth:$check", time() + 86400 * 30, '/', $host);
     }
 
     protected function getUidFromCookie() {
-        if (!isset($_COOKIE['_yyc']) || empty($_COOKIE['_yyc'])) {
-            Log::addNotice('cookie.yyc', 'empty');
+        if (!isset($_COOKIE['_sbit']) || empty($_COOKIE['_sbit'])) {
             return false;
         }
-        Log::addNotice('cookie.yyc', $_COOKIE['_yyc']);
-        $arrTmp = explode(':', $_COOKIE['_yyc']);
+        $arrTmp = explode(':', $_COOKIE['_sbit']);
         if (count($arrTmp) < 2) {
             return false;
         }
         $auth = $arrTmp[0];
         $check = $arrTmp[1];
-        $genCheck = hash_hmac('sha256', $auth . 'dongqiudi.com', 'cookieAuth');
+        $genCheck = hash_hmac('sha256', $auth . 'shuibit.com', 'cookieAuth');
         if ($check != $genCheck) {
             Log::addNotice('cookie.check', 'failed');
             return false;
         }
-        $str = openssl_decrypt($auth, 'aes-256-cbc', 'Dong@Qiu&*', 0, 'aZdy0');
+        $str = openssl_decrypt($auth, 'aes-256-cbc', 'Shui@Bit&*', 0, 'aZdy0');
         Log::addNotice('cookie.auth', $str);
         $arrAuth = explode(':', $str);
         return $arrAuth[0];
     }
 
     /**
-     * 用户是否合法登陆
+     * 登陆判断
      * @return bool
      */
     protected function isLogin() {
-
-       if (!$this->authToken) {
-           return false;
-       }
-
-       $login = AuthorizeService::isLogin($this->authToken);
-
-       return $login;
+        if (!$this->authToken) {
+            return false;
+        }
+        $service = new AuthorizeService();
+        $login = $service->isLogin($this->authToken);
+        return $login;
     }
 
     /**
@@ -281,13 +244,14 @@ class Basecontroller extends CommonServer {
         if (!$this->authToken) {
             return false;
         }
-        $authorize = AuthorizeService::isLogin($this->authToken);
+        $service = new AuthorizeService();
+        $authorize = $service->isLogin($this->authToken);
         if (!$authorize) {
            return false;
         }
         $userId = $authorize['user_id'];
-        $user   = UserService::getUserInfoById($userId, $raw);
-        Log::addNotice('login.uid', $userId);
+        $uservice = new UserService();
+        $user   = $uservice->getUserInfoById($userId, $raw);
         return $user;
     }
 
