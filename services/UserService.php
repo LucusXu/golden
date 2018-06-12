@@ -12,7 +12,7 @@ use services\AuthorizeService;
 class UserService {
     private $_user = null;
     public function __construct() {
-        $this->_user = \UserModel::getInstance();
+        $this->_user = \UsersModel::getInstance();
     }
 
     public function getUserInfoById($id) {
