@@ -23,8 +23,8 @@ class FeedController extends Basecontroller {
         $uid = $user['id'];
         $content = $this->getParam('content', '');
 
-        if (!$id) {
-            $this->returnResult(ErrorDefine::ERRNO_PARAMETER, 'id不能为空');
+        if (!$content) {
+            $this->returnResult(ErrorDefine::ERRNO_PARAMETER, 'content不能为空');
         }
 
         $service = new services\FeedService();
