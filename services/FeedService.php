@@ -14,8 +14,10 @@ use library\util\Util;
 
 class FeedService {
     private $_newsObj = null;
+    private $_newsLike = null;
     public function __construct() {
         $this->_newsObj = \NewsModel::getInstance();
+        $this->_newsLike = \NewsModel::getInstance();
     }
 
     public function create($uid, $content) {
@@ -56,6 +58,7 @@ class FeedService {
      * @desc 点赞
      * @param $uid
      * @param $id
+     * @param $status
      * @return
      */
     public function likeFeed($uid, $id, $status) {
@@ -67,9 +70,18 @@ class FeedService {
         }
 
         // TODO检查是否已经赞过
-        $this->__newsObj->updateLikeNum($id, $up_cnt_cache);
+        $cur_like_num = $article['like_num'];
+        $ret = $this->_newsLike->getUserArticleLike($uid, $id, $status, 'feed');
+        if ($ret) {
+            Log::warning(__FUNCTION__ . " repeat like");
+            $errno = ErrorDefine::ERRNO_HAS_LIKE;
+            return Util::returnResult($errno);
+        }
+
+        $up_cnt_num = $cur_like_num + 1;
+        $this->_newsObj->updateLikeNum($id, $up_cnt_num);
         // 记录点赞事件
-        $this->__newsLike->addLikeEvent($uid, $id, $status);
+        $this->_newsLike->addLikeEvent($uid, $id, $status, 'feed');
 
         $data = [
             'uid' => $article['uid'],
