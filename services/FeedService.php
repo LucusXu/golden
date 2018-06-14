@@ -17,7 +17,7 @@ class FeedService {
     private $_newsLike = null;
     public function __construct() {
         $this->_newsObj = \NewsModel::getInstance();
-        $this->_newsLike = \NewsModel::getInstance();
+        $this->_newsLike = \LikeEventModel::getInstance();
     }
 
     public function create($uid, $content) {
@@ -72,6 +72,7 @@ class FeedService {
         // TODO检查是否已经赞过
         $cur_like_num = $article['like_num'];
         $ret = $this->_newsLike->getUserArticleLike($uid, $id, $status, 'feed');
+
         if ($ret) {
             Log::warning(__FUNCTION__ . " repeat like");
             $errno = ErrorDefine::ERRNO_HAS_LIKE;
@@ -81,7 +82,7 @@ class FeedService {
         $up_cnt_num = $cur_like_num + 1;
         $this->_newsObj->updateLikeNum($id, $up_cnt_num);
         // 记录点赞事件
-        $this->_newsLike->addLikeEvent($uid, $id, $status, 'feed');
+        $like_id = $this->_newsLike->addLikeEvent($uid, $id, $status, 'feed');
 
         $data = [
             'uid' => $article['uid'],

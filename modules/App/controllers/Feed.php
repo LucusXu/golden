@@ -98,7 +98,7 @@ class FeedController extends Basecontroller {
         }
         $errno = ErrorDefine::ERRNO_SUCCESS;
         $errmsg = ErrorDefine::getMsg($errno);
-        $this->returnResult($errno, $errmsg);
+        $this->returnResult($errno, $errmsg, $ret['data']);
     }
 
     /**

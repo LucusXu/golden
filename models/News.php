@@ -12,7 +12,7 @@ use library\define\ErrorDefine;
 
 class NewsModel extends ModelBase {
     public $_tableName = 'coin_news_content';
-    private $_fields = 'title, summary, content, source, published_at, tags';
+    private $_fields = 'title, summary, content, published_at, uid, like_num, comment_num, status';
 
 	public function __construct() {
         parent::__construct(Constant::DB_NAME_GOLDEN);
@@ -78,5 +78,30 @@ class NewsModel extends ModelBase {
             return false;
         }
         return $ret[0]['count(id)'];
+    }
+
+    public function getNewsById($id) {
+        $where = [
+            'id='=> $id,
+        ];
+        $ret = $this->db->select($this->_tableName, $this->_fields, $where);
+        if (false === $ret) {
+            throw new \Exception('查询失败', ErrorDefine::ERRNO_MYSQL_CONNECT_ERROR);
+        }
+
+        if (count($ret)) {
+            return $ret[0];
+        }
+        return $ret;
+    }
+
+    public function updateLikeNum($id, $like_num) {
+        $sql = "update {$this->_tableName} set like_num={$like_num} where `id` = {$id}";
+        $ret = $this->db->query($sql);
+        if (false === $ret) {
+            Log::warning("db connect fail");
+            return false;
+        }
+        return true;
     }
 }

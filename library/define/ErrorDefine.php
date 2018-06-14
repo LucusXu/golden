@@ -16,6 +16,8 @@ class ErrorDefine {
     const ERRNO_REDIS_CONNENT_ERROR = 2000;
     const ERRNO_MYSQL_CONNECT_ERROR = 2001;
 
+    const ERRNO_NO_ARTICLE              = 30000;
+
     public static $messageMap = [
         self::ERRNO_SUCCESS => 'success',
         self::ERRNO_FAIL  => 'fail',
@@ -26,6 +28,8 @@ class ErrorDefine {
         self::ERRNO_NO_RIGHT => '没有权限',
         self::ERRNO_BAD_USER => '用户不存在',
         self::ERRNO_WRONG_PASSWD => '账户或密码错误',
+
+        self::ERRNO_NO_ARTICLE      => '文章丢失',
     ];
 
     public static $defaultError = "error message not set!";
