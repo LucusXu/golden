@@ -17,6 +17,10 @@ class ErrorDefine {
     const ERRNO_MYSQL_CONNECT_ERROR = 2001;
 
     const ERRNO_NO_ARTICLE              = 30000;
+    const ERRNO_HAS_LIKE                = 30001;
+    const ERRNO_HAS_QUOTE               = 30002;
+    const ERRNO_HAS_SHARE               = 30003;
+    const ERRNO_HAS_COLLECT             = 30004;
 
     public static $messageMap = [
         self::ERRNO_SUCCESS => 'success',
@@ -30,6 +34,10 @@ class ErrorDefine {
         self::ERRNO_WRONG_PASSWD => '账户或密码错误',
 
         self::ERRNO_NO_ARTICLE      => '文章丢失',
+        self::ERRNO_HAS_LIKE        => '已经点赞了',
+        self::ERRNO_HAS_QUOTE       => '已经转发了',
+        self::ERRNO_HAS_SHARE       => '已经分享了',
+        self::ERRNO_HAS_COLLECT     => '已经收藏了',
     ];
 
     public static $defaultError = "error message not set!";

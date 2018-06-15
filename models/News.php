@@ -12,7 +12,7 @@ use library\define\ErrorDefine;
 
 class NewsModel extends ModelBase {
     public $_tableName = 'coin_news_content';
-    private $_fields = 'title, summary, content, published_at, uid, like_num, comment_num, status';
+    private $_fields = 'title, summary, content, published_at, uid, like_num, comment_num, status, quote_num, share_num, collect_num';
 
 	public function __construct() {
         parent::__construct(Constant::DB_NAME_GOLDEN);
@@ -97,6 +97,36 @@ class NewsModel extends ModelBase {
 
     public function updateLikeNum($id, $like_num) {
         $sql = "update {$this->_tableName} set like_num={$like_num} where `id` = {$id}";
+        $ret = $this->db->query($sql);
+        if (false === $ret) {
+            Log::warning("db connect fail");
+            return false;
+        }
+        return true;
+    }
+
+    public function updateQuoteNum($id, $quote_num) {
+        $sql = "update {$this->_tableName} set quote_num={$quote_num} where `id` = {$id}";
+        $ret = $this->db->query($sql);
+        if (false === $ret) {
+            Log::warning("db connect fail");
+            return false;
+        }
+        return true;
+    }
+
+    public function updateShareNum($id, $share_num) {
+        $sql = "update {$this->_tableName} set share_num={$share_num} where `id` = {$id}";
+        $ret = $this->db->query($sql);
+        if (false === $ret) {
+            Log::warning("db connect fail");
+            return false;
+        }
+        return true;
+    }
+
+    public function updateCollectNum($id, $collect_num) {
+        $sql = "update {$this->_tableName} set collect_num={$collect_num} where `id` = {$id}";
         $ret = $this->db->query($sql);
         if (false === $ret) {
             Log::warning("db connect fail");

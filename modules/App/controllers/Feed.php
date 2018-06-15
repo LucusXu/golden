@@ -102,7 +102,7 @@ class FeedController extends Basecontroller {
     }
 
     /**
-     * @desc 站内转发
+     * @desc 站内转发, 不能取消
      */
     public function quoteAction() {
         $user = $this->getUserInfo();
@@ -167,7 +167,7 @@ class FeedController extends Basecontroller {
             $this->returnResult(ErrorDefine::ERRNO_FAIL);
         }
         $uid = $user['id'];
-        $id = intval($this->getParam('id', ''));
+        $id = intval($this->getParam('feed_id', ''));
         if (!$id) {
             $this->returnResult(ErrorDefine::ERRNO_PARAMETER, 'id不能为空');
         }

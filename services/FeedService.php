@@ -15,9 +15,11 @@ use library\util\Util;
 class FeedService {
     private $_newsObj = null;
     private $_newsLike = null;
+    private $_newsActionRecord = null;
     public function __construct() {
         $this->_newsObj = \NewsModel::getInstance();
         $this->_newsLike = \LikeEventModel::getInstance();
+        $this->_newsActionRecord = \ActionRecordsModel::getInstance();
     }
 
     public function create($uid, $content) {
@@ -83,6 +85,110 @@ class FeedService {
         $this->_newsObj->updateLikeNum($id, $up_cnt_num);
         // 记录点赞事件
         $like_id = $this->_newsLike->addLikeEvent($uid, $id, $status, 'feed');
+
+        $data = [
+            'uid' => $article['uid'],
+        ];
+        return Util::returnSucc($data);
+    }
+
+    /**
+     * @desc 站内转发
+     * @param $uid
+     * @param $id
+     * @return
+     */
+    public function quoteFeed($uid, $id) {
+        $article = $this->_newsObj->getNewsById($id);
+        if (!$article) {
+            Log::warning(__FUNCTION__ . " no like article");
+            $errno = ErrorDefine::ERRNO_NO_ARTICLE;
+            return Util::returnResult($errno);
+        }
+
+        // TODO检查是否已经赞过
+        $cur_quote_num = $article['quote_num'];
+        $ret = $this->_newsActionRecord->getUserArticleRecord($uid, $id, 'quote');
+
+        if ($ret) {
+            Log::warning(__FUNCTION__ . " repeat quote");
+            $errno = ErrorDefine::ERRNO_HAS_QUOTE;
+            return Util::returnResult($errno);
+        }
+
+        $up_cnt_num = $cur_quote_num + 1;
+        $this->_newsObj->updateQuoteNum($id, $up_cnt_num);
+        // 记录事件
+        $quote_id = $this->_newsActionRecord->addActionRecord($uid, $id, 'quote');
+
+        $data = [
+            'uid' => $article['uid'],
+        ];
+        return Util::returnSucc($data);
+    }
+
+    /**
+     * @desc 站外分享
+     * @param $uid
+     * @param $id
+     * @return
+     */
+    public function shareFeed($uid, $id) {
+        $article = $this->_newsObj->getNewsById($id);
+        if (!$article) {
+            Log::warning(__FUNCTION__ . " no like article");
+            $errno = ErrorDefine::ERRNO_NO_ARTICLE;
+            return Util::returnResult($errno);
+        }
+
+        // TODO检查是否已经分享
+        $cur_share_num = $article['share_num'];
+        $ret = $this->_newsActionRecord->getUserArticleRecord($uid, $id, 'share');
+
+        if ($ret) {
+            Log::warning(__FUNCTION__ . " repeat share");
+            $errno = ErrorDefine::ERRNO_HAS_SHARE;
+            return Util::returnResult($errno);
+        }
+
+        $up_cnt_num = $cur_share_num + 1;
+        $this->_newsObj->updateShareNum($id, $up_cnt_num);
+        // 记录事件
+        $share_id = $this->_newsActionRecord->addActionRecord($uid, $id, 'share');
+
+        $data = [
+            'uid' => $article['uid'],
+        ];
+        return Util::returnSucc($data);
+    }
+
+    /**
+     * @desc 收藏
+     * @param $uid
+     * @param $id
+     * @return
+     */
+    public function collectFeed($uid, $id) {
+        $article = $this->_newsObj->getNewsById($id);
+        if (!$article) {
+            Log::warning(__FUNCTION__ . " no collect article");
+            $errno = ErrorDefine::ERRNO_NO_ARTICLE;
+            return Util::returnResult($errno);
+        }
+
+        $cur_collect_num = $article['collect_num'];
+        $ret = $this->_newsActionRecord->getUserArticleRecord($uid, $id, 'collect');
+
+        if ($ret) {
+            Log::warning(__FUNCTION__ . " repeat collect");
+            $errno = ErrorDefine::ERRNO_HAS_COLLECT;
+            return Util::returnResult($errno);
+        }
+
+        $up_cnt_num = $cur_collect_num + 1;
+        $this->_newsObj->updateCollectNum($id, $up_cnt_num);
+        // 记录事件
+        $collect_id = $this->_newsActionRecord->addActionRecord($uid, $id, 'collect');
 
         $data = [
             'uid' => $article['uid'],
