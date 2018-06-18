@@ -47,4 +47,15 @@ class LikeEventModel extends ModelBase {
         }
         return $this->db->getInsertID();
     }
+
+    public function getArticleLikeUids($event_id, $limit) {
+        $sql ='SELECT uid, updated_at from ' . $this->_tableName
+            .' WHERE event_type="feed" and event_id=' . $event_id . " limit " . $limit;
+        $ret = $this->db->query($sql);
+        if (false === $ret) {
+            Log::warning("execute sql fail");
+            return false;
+        }
+        return $ret;
+    }
 }

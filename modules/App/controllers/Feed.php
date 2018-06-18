@@ -34,7 +34,7 @@ class FeedController extends Basecontroller {
         }
         $errno = ErrorDefine::ERRNO_SUCCESS;
         $errmsg = ErrorDefine::getMsg($errno);
-        $this->returnResult($errno, $errmsg);
+        $this->returnResult($errno, $errmsg, $ret['data']);
     }
 
     /**
@@ -265,20 +265,17 @@ class FeedController extends Basecontroller {
      */
     public function likeListAction() {
         $user = $this->getUserInfo();
-        if (!$user) {
-            $this->returnResult(ErrorDefine::ERRNO_NO_LOGIN);
+        $uid = 0;
+        if ($user) {
+            $uid = $user['id'];
         }
-        if (!isset($user['id'])) {
-            $this->returnResult(ErrorDefine::ERRNO_FAIL);
-        }
-        $uid = $user['id'];
-        $feed_id = intval($this->getParam('feed_id', ''));
+        $id = intval($this->getParam('feed_id', ''));
         if (!$id) {
             $this->returnResult(ErrorDefine::ERRNO_PARAMETER, 'id不能为空');
         }
 
         $service = new services\FeedService();
-        $ret = $service->getLikeList($uid, $id);
+        $ret = $service->getLikeList($id, $uid);
         if (0 != $ret['errno']) {
             $this->returnResult($ret['errno'], $ret['errmsg']);
         }
@@ -292,20 +289,17 @@ class FeedController extends Basecontroller {
      */
     public function quoteListAction() {
         $user = $this->getUserInfo();
-        if (!$user) {
-            $this->returnResult(ErrorDefine::ERRNO_NO_LOGIN);
+        $uid = 0;
+        if ($user) {
+            $uid = $user['id'];
         }
-        if (!isset($user['id'])) {
-            $this->returnResult(ErrorDefine::ERRNO_FAIL);
-        }
-        $uid = $user['id'];
-        $quote_id = intval($this->getParam('quote_id', ''));
+        $id = intval($this->getParam('feed_id', ''));
         if (!$id) {
             $this->returnResult(ErrorDefine::ERRNO_PARAMETER, 'id不能为空');
         }
 
         $service = new services\FeedService();
-        $ret = $service->getQuoteList($uid, $id);
+        $ret = $service->getQuoteList($id, $uid);
         if (0 != $ret['errno']) {
             $this->returnResult($ret['errno'], $ret['errmsg']);
         }

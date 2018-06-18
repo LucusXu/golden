@@ -43,7 +43,7 @@ class FeedService {
             return false;
         }
         $ret['id'] = $new_id;
-        return $ret;
+        return Util::returnSucc($ret);
     }
 
     public function getFeedList(&$next_id, $user = null) {
@@ -241,6 +241,36 @@ class FeedService {
         $data = [
             'uid' => $article['uid'],
         ];
+        return Util::returnSucc($data);
+    }
+
+    public function getLikeList($feed_id, $uid) {
+        $limit = 20;
+        $ret = $this->_newsLike->getArticleLikeUids($feed_id, $limit);
+        $service = new UserService();
+        $data = [];
+        foreach ($ret as $one) {
+            $user = $service->getUserInfoById($one['uid']);
+            $tmp = [];
+            $tmp['user'] = $user;
+            $tmp['published_at'] = $one['updated_at'];
+            $data[] = $tmp;
+        }
+        return Util::returnSucc($data);
+    }
+
+    public function getQuoteList($feed_id, $uid) {
+        $limit = 20;
+        $ret = $this->_newsLike->getArticleLikeUids($feed_id, $limit);
+        $service = new UserService();
+        $data = [];
+        foreach ($ret as $one) {
+            $user = $service->getUserInfoById($one['uid']);
+            $tmp = [];
+            $tmp['user'] = $user;
+            $tmp['published_at'] = $one['updated_at'];
+            $data[] = $tmp;
+        }
         return Util::returnSucc($data);
     }
 }

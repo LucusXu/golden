@@ -28,8 +28,8 @@ class CommentController extends Basecontroller {
         $next_id   = intval($this->getParam('next', 0));
 
         $service = new services\CommentService();
-        $ret = $service->newCommentList($topic_id, $uid, $next_id, $comment_id);
-        if (!$ret) {
+        $ret = $service->commentList($feed_id, $uid, $next_id);
+        if (false === $ret) {
             $errno = ErrorDefine::ERRNO_FAIL;
             $errmsg = ErrorDefine::getMsg($errno);
             $this->returnResult($errno, $errmsg);
@@ -74,19 +74,19 @@ class CommentController extends Basecontroller {
         $reply_id = intval($this->getParam('reply_id', ''));
 
         $service = new services\CommentService();
-        $ret = $service->addComment($feed_id, $user, $content, $quote_id, $cid);
+        $ret = $service->addComment($feed_id, $user, $content, $reply_id);
 
         if (0 != $ret['errno']) {
             $this->returnResult($ret['errno'], $ret['errmsg']);
         }
         $data = [
             'user'      => $user,
-            'id'        => strval($cid),
+            'id'        => $ret['data']['id'],
             'content'   => $content,
             'created_at'=> strval(time()),
         ];
-        if (isset($ret['data']['quote'])) {
-            $arrData['quote'] = $ret['data']['quote'];
+        if (isset($ret['data']['reply'])) {
+            $arrData['reply'] = $ret['data']['reply'];
         }
         $errno = ErrorDefine::ERRNO_SUCCESS;
         $errmsg = ErrorDefine::getMsg($errno);

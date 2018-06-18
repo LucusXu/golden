@@ -11,8 +11,6 @@ use library\define\Constant;
 use library\define\ErrorDefine;
 use library\util\Util;
 
-use services\SpamService;
-
 class CommentService {
     private $_comment = null;
     private $_commentLike = null;
@@ -26,37 +24,26 @@ class CommentService {
      * @param $uid
      * @param $feed_id
      * @param $content
-     * @param $quote_id
+     * @param $reply_id
      * @return
      */
-    public function createComment($user, $pid, $content, $quote_id = 0) {
+    public function addComment($uid, $feed_id, $content, $reply_id = 0) {
         // check是否合法
         $ret = [];
-        if ($quote_id) {
-            $quote = $this->_comment->getCommentById($quote_id);
-            if (!$quote) {
-                Log::warning(__FUNCTION__ . " quote comment failed");
-                return ErrorDefine::ERRNO_QUOTE_COMMENT_ERROR;
+        if ($reply_id) {
+            $reply = $this->_comment->getCommentById($reply_id);
+            if (!$reply) {
+                Log::warning(__FUNCTION__ . " reply comment failed");
+                return ErrorDefine::ERRNO_REPLY_COMMENT_ERROR;
             }
-            $ret['quote'] = [
-                'id' => $quote['id'],
-                'uid' => $quote['uid'],
-                'content' => $quote['content'],
+            $ret['reply'] = [
+                'id' => $reply['id'],
+                'uid' => $reply['uid'],
+                'content' => $reply['content'],
             ];
         }
-        $uid = $user['id'];
 
-        // antispam
-        $service = new SpamService();
-        $check_res = $service->check($user, $content);
-        if (0 != $check_res['errno']) {
-            Log::warning(__FUNCTION__ . " check failed");
-            return false;
-        }
-        $status = $check_res['data']['status'];
-        $ret['status'] = $status;
-
-        $new_id = $this->_comment->addComment($uid, $pid, $content, $quote_id, $tags, $status);
+        $new_id = $this->_comment->addComment($uid, $feed_id, $content, $reply_id);
         Log::warning("new id:" . $new_id);
         if (false === $new_id) {
             Log::warning(__FUNCTION__ . " addComment failed");
@@ -64,7 +51,7 @@ class CommentService {
         }
 
         $ret['id'] = $new_id;
-        return $ret;
+        return Util::returnSucc($ret);
     }
 
     /**
@@ -125,43 +112,14 @@ class CommentService {
 
     /**
      * @desc 查询评论列表
-     * @param $topic_id
-     * @param $uid
-     * @param $next_id
-     * @return
      */
-    public function commentList($topic_id, $uid, $next_id, $comment_id = null) {
-        $limit = Constant::COMMENT_PAGE_SIZE;
-        $comments = $this->_comment->getComments($topic_id, $next_id, $limit);
+    public function commentList($feed_id, $uid, $next_id) {
+        $limit = 20;
+        $comments = $this->_comment->getComments($feed_id, $next_id, $limit);
         if (!$comments) {
             return null;
         }
         $quote_ids = [];
-        // 通过uid查询点赞的评论id
-        $codis = RdsManager::getCoinM2Codis();
-        if (!$codis) {
-            Log::warning(__FUNCTION__ . " codis connect fail");
-            $errno = ErrorDefine::ERRNO_REDIS_CONNENT_ERROR;
-            return Util::returnResult($errno);
-        }
-        $key = Constant::REDIS_USER_UP_RECORD . $uid;
-        $records = $codis->Smembers($key);
-
-        if ($comment_id) {
-            $has_find = false;
-            foreach ($comments as $one) {
-                if ($one['id'] == $comment_id) {
-                    $has_find = true;
-                    break;
-                }
-            }
-            if (!$has_find) {
-                $current_comment = $this->_comment->getCommentById($comment_id);
-                if ($current_comment) {
-                    $comments[] = $current_comment;
-                }
-            }
-        }
 
         foreach ($comments as $key => &$one) {
             if ($one['status'] != 1 && $one['status'] != 3 && $one['uid'] != $uid) {

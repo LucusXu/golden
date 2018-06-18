@@ -10,7 +10,7 @@ use library\define\ErrorDefine;
 use library\define\Constant;
 
 class CommentModel extends ModelBase {
-    protected $_tableName = 'comments';
+    protected $_tableName = 'comment';
     private $_fields = 'id, uid, feed_id, content, status, quote_id, like_num, created_at';
 
     public function __construct() {
@@ -25,12 +25,12 @@ class CommentModel extends ModelBase {
      * @param $tags
      * @return
      */
-    public function addComment($uid, $feed_id, $content, $quote_id, $status = 1) {
+    public function addComment($uid, $feed_id, $content, $quote_id) {
         $data = [
             'uid' => $uid,
-            'pid' => $feed_id,
+            'feed_id' => $feed_id,
             'content' => $content,
-            'status' => $status,
+            'status' => 1,
         ];
         if ($quote_id) {
             $data['quote_id'] = $quote_id;
@@ -40,7 +40,7 @@ class CommentModel extends ModelBase {
             "uid" => $uid,
             "feed_id" => $feed_id,
             "content" => $content,
-            'status' => $status,
+            'status' => 1,
         ];
         $ret = $this->db->insert($this->_tableName, $data, null, $onDup);
         if (false === $ret) {
