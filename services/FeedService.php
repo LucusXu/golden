@@ -22,6 +22,16 @@ class FeedService {
         $this->_newsActionRecord = \ActionRecordsModel::getInstance();
     }
 
+    public function detailFeed($id, $uid) {
+        $article = $this->_newsObj->getNewsById($id);
+        if (false === $article) {
+            Log::warning(__FUNCTION__ . " add article failed");
+            return null;
+        }
+        // $author = getUserInfo($article['uid']);
+        return Util::returnSucc($article);
+    }
+
     public function create($uid, $content) {
         $new_id = $this->_newsObj->addArticle($uid, $content);
         if (false === $new_id) {
@@ -169,6 +179,40 @@ class FeedService {
      * @return
      */
     public function collectFeed($uid, $id) {
+        $article = $this->_newsObj->getNewsById($id);
+        if (!$article) {
+            Log::warning(__FUNCTION__ . " no collect article");
+            $errno = ErrorDefine::ERRNO_NO_ARTICLE;
+            return Util::returnResult($errno);
+        }
+
+        $cur_collect_num = $article['collect_num'];
+        $ret = $this->_newsActionRecord->getUserArticleRecord($uid, $id, 'collect');
+
+        if ($ret) {
+            Log::warning(__FUNCTION__ . " repeat collect");
+            $errno = ErrorDefine::ERRNO_HAS_COLLECT;
+            return Util::returnResult($errno);
+        }
+
+        $up_cnt_num = $cur_collect_num + 1;
+        $this->_newsObj->updateCollectNum($id, $up_cnt_num);
+        // 记录事件
+        $collect_id = $this->_newsActionRecord->addActionRecord($uid, $id, 'collect');
+
+        $data = [
+            'uid' => $article['uid'],
+        ];
+        return Util::returnSucc($data);
+    }
+
+    /**
+     * @desc 关注
+     * @param $uid
+     * @param $id
+     * @return
+     */
+    public function followFeed($uid, $author_uid) {
         $article = $this->_newsObj->getNewsById($id);
         if (!$article) {
             Log::warning(__FUNCTION__ . " no collect article");

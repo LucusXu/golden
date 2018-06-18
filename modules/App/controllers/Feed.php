@@ -241,26 +241,23 @@ class FeedController extends Basecontroller {
      */
     public function detailAction() {
         $user = $this->getUserInfo();
-        if (!$user) {
-            $this->returnResult(ErrorDefine::ERRNO_NO_LOGIN);
+        $uid = 0;
+        if ($user) {
+            $uid = $user['id'];
         }
-        if (!isset($user['id'])) {
-            $this->returnResult(ErrorDefine::ERRNO_FAIL);
-        }
-        $uid = $user['id'];
         $id = intval($this->getParam('id', ''));
         if (!$id) {
             $this->returnResult(ErrorDefine::ERRNO_PARAMETER, 'id不能为空');
         }
 
         $service = new services\FeedService();
-        $ret = $service->detailFeed($uid, $id);
+        $ret = $service->detailFeed($id, $uid);
         if (0 != $ret['errno']) {
             $this->returnResult($ret['errno'], $ret['errmsg']);
         }
         $errno = ErrorDefine::ERRNO_SUCCESS;
         $errmsg = ErrorDefine::getMsg($errno);
-        $this->returnResult($errno, $errmsg);
+        $this->returnResult($errno, $errmsg, $ret['data']);
     }
 
     /**
