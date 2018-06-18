@@ -12,6 +12,8 @@ use library\define\ErrorDefine;
 use library\util\RdsManager;
 use library\util\Util;
 
+use services\UserService;
+
 class FeedService {
     private $_newsObj = null;
     private $_newsLike = null;
@@ -28,7 +30,9 @@ class FeedService {
             Log::warning(__FUNCTION__ . " add article failed");
             return null;
         }
-        // $author = getUserInfo($article['uid']);
+        $service = new UserService();
+        $author = $service->getUserInfoById($article['uid']);
+        $article['user'] = $author;
         return Util::returnSucc($article);
     }
 
