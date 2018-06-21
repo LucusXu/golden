@@ -33,4 +33,23 @@ class UsersModel extends ModelBase {
         }
         return false;
     }
+
+    public function create($name, $phoneNum, $uuid, $password) {
+        $onDup = [
+            "name" => $name,
+            "password" => $password,
+        ];
+        $data = [
+            'name' => $name,
+            'phone_number' => $phoneNum,
+            'uuid' => $uuid,
+            'password' => $password,
+        ];
+        $ret = $this->db->insert($this->getTableName(), $data, null, $onDup);
+        if (false === $ret) {
+            return false;
+        }
+        $id = $this->db->getInsertID();
+        return $id;
+    }
 }

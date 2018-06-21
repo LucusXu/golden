@@ -39,4 +39,17 @@ class UserService {
         $user   = $this->getUserInfoById($userId);
         return $user;
     }
+
+    public function create($name, $phoneNum, $uuid, $password) {
+        $ret = $this->_user->create($name, $phoneNum, $uuid, $password);
+        if (false === $ret) {
+            Log::warning(__FUNCTION__ . " create user failed");
+            $errno = ErrorDefine::ERRNO_CREATE_USER_ERROR;
+            return Util::returnResult($errno, ErrorDefine::getMsg($errno));
+        }
+        $data = [
+            'id' => $ret,
+        ];
+        return Util::returnSucc($data);
+    }
 }

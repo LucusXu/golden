@@ -21,6 +21,7 @@ class ErrorDefine {
     const ERRNO_HAS_QUOTE               = 30002;
     const ERRNO_HAS_SHARE               = 30003;
     const ERRNO_HAS_COLLECT             = 30004;
+    const ERRNO_CREATE_USER_ERROR       = 30005;
 
     public static $messageMap = [
         self::ERRNO_SUCCESS => 'success',
@@ -38,6 +39,7 @@ class ErrorDefine {
         self::ERRNO_HAS_QUOTE       => '已经转发了',
         self::ERRNO_HAS_SHARE       => '已经分享了',
         self::ERRNO_HAS_COLLECT     => '已经收藏了',
+        self::ERRNO_CREATE_USER_ERROR     => '注册失败',
     ];
 
     public static $defaultError = "error message not set!";
