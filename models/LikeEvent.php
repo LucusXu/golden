@@ -17,9 +17,9 @@ class LikeEventModel extends ModelBase {
         parent::__construct(Constant::DB_NAME_GOLDEN);
     }
 
-    public function getUserArticleLike($event_id, $uid) {
+    public function getUserArticleLike($event_id, $uid, $status = 1, $event_type = 'feed') {
         $sql ='SELECT id from ' . $this->_tableName
-            .' WHERE event_type="feed" and event_id=' . $event_id . ' and relate_id=' . $uid;
+            .' WHERE event_type="' . $event_type . '" and event_id=' . $event_id . ' and relate_id=' . $uid;
         $ret = $this->db->query($sql);
         if (false === $ret) {
             Log::warning("execute sql fail");

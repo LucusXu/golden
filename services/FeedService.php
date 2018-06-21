@@ -47,14 +47,14 @@ class FeedService {
     }
 
     public function getFeedList(&$next_id, $user = null) {
-        $limit = 2;
+        $limit = 20;
         $feeds = $this->_newsObj->getArticleList($next_id, $limit);
         if (!$feeds) {
             return null;
         }
 
         $data = [
-            "feed" => $feeds,
+            "list" => $feeds,
             "has_more" => false,
         ];
         $count = $this->_newsObj->nextCount($next_id);
@@ -62,11 +62,56 @@ class FeedService {
             $data['has_more'] = true;
         }
 
+        $new_feed = [];
+        $service = new UserService();
         foreach ($feeds as $one) {
             if ($one['id'] > $next_id) {
                 $next_id = $one['id'];
             }
+            $tmp = [
+                'fid' => intval($one['id']),
+                'type' => intval($one['type']),
+                'statistics' => [
+                    'comment_cnt' => intval($one['comment_num']),
+                    'like_cnt' => intval($one['like_num']),
+                    'repost_cnt' => intval($one['quote_num']),
+                    'collect_cnt' => intval($one['collect_num']),
+                    'has_liked' => 0,
+                    'has_collected' => 0,
+                ],
+                'talk' => [
+                    'summary' => $one['summary'],
+                    'imgs' => [],
+                ],
+            ];
+            $user = $service->getUserInfoById($one['uid']);
+            if ($user) {
+                $author = [
+                    'uid' => $user['id'],
+                    'nickname' => $user['name'],
+                    'avatar_url' => $user['avatar'],
+                    // 'city' => $user['location'],
+                    'follow_status' => 0,
+                ];
+                $tmp['author'] = $author;
+            }
+
+            $liked = $this->_newsLike->getUserArticleLike($one['id'], $one['uid']);
+            if ($liked) {
+                $tmp['statistics']['has_liked'] = 1;
+            }
+            $collected = $this->_newsActionRecord->getUserArticleRecord($one['id'], $one['uid'], 'collect');
+            if ($collected) {
+                $tmp['statistics']['has_collected'] = 1;
+            }
+            $tmp['created_at'] = strtotime($one['created_at']);
+            $new_feed[] = $tmp;
         }
+
+        $data = [
+            "list" => $new_feed,
+            "has_more" => false,
+        ];
         return Util::returnSucc($data);
     }
 
@@ -87,7 +132,7 @@ class FeedService {
 
         // TODO检查是否已经赞过
         $cur_like_num = $article['like_num'];
-        $ret = $this->_newsLike->getUserArticleLike($uid, $id, $status, 'feed');
+        $ret = $this->_newsLike->getUserArticleLike($id, $uid, $status, 'feed');
 
         if ($ret) {
             Log::warning(__FUNCTION__ . " repeat like");
@@ -225,7 +270,7 @@ class FeedService {
         }
 
         $cur_collect_num = $article['collect_num'];
-        $ret = $this->_newsActionRecord->getUserArticleRecord($uid, $id, 'collect');
+        $ret = $this->_newsActionRecord->getUserArticleRecord($id, $uid, 'collect');
 
         if ($ret) {
             Log::warning(__FUNCTION__ . " repeat collect");
