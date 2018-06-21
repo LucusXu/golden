@@ -38,6 +38,7 @@ class NewsModel extends ModelBase {
         $data = [
             'uid' => $uid,
             'content' => $content,
+            'summary' => $content,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 

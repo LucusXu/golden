@@ -297,7 +297,17 @@ class FeedService {
         foreach ($ret as $one) {
             $user = $service->getUserInfoById($one['uid']);
             $tmp = [];
-            $tmp['user'] = $user;
+            if ($user) {
+                $author = [
+                    'uid' => $user['id'],
+                    'nickname' => $user['name'],
+                    'avatar_url' => $user['avatar'],
+                    // 'city' => $user['location'],
+                    'follow_status' => 0,
+                ];
+                $tmp['author'] = $author;
+            }
+
             $tmp['published_at'] = $one['updated_at'];
             $data[] = $tmp;
         }

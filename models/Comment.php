@@ -31,6 +31,7 @@ class CommentModel extends ModelBase {
             'feed_id' => $feed_id,
             'content' => $content,
             'status' => 1,
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
         if ($quote_id) {
             $data['quote_id'] = $quote_id;
@@ -41,6 +42,7 @@ class CommentModel extends ModelBase {
             "feed_id" => $feed_id,
             "content" => $content,
             'status' => 1,
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
         $ret = $this->db->insert($this->_tableName, $data, null, $onDup);
         if (false === $ret) {

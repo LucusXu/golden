@@ -10,6 +10,7 @@ use GOD\Log;
 use library\define\Constant;
 use library\define\ErrorDefine;
 use library\util\Util;
+use services\UserService;
 
 class CommentService {
     private $_comment = null;
@@ -27,7 +28,7 @@ class CommentService {
      * @param $reply_id
      * @return
      */
-    public function addComment($uid, $feed_id, $content, $reply_id = 0) {
+    public function addComment($feed_id, $user, $content, $reply_id = 0) {
         // check是否合法
         $ret = [];
         if ($reply_id) {
@@ -43,7 +44,7 @@ class CommentService {
             ];
         }
 
-        $new_id = $this->_comment->addComment($uid, $feed_id, $content, $reply_id);
+        $new_id = $this->_comment->addComment($user['id'], $feed_id, $content, $reply_id);
         Log::warning("new id:" . $new_id);
         if (false === $new_id) {
             Log::warning(__FUNCTION__ . " addComment failed");
@@ -119,57 +120,48 @@ class CommentService {
         if (!$comments) {
             return null;
         }
-        $quote_ids = [];
 
         foreach ($comments as $key => &$one) {
-            if ($one['status'] != 1 && $one['status'] != 3 && $one['uid'] != $uid) {
+            if ($one['status'] != 1) {
                 unset($comments[$key]);
                 continue;
             }
-            // 引用
-            if ($one['quote_id']) {
-                $quote_ids[] = $one['quote_id'];
-            }
             // 是否已经赞过
             $one['is_like'] = 0;
-            if ($uid && in_array($one['id'], $records)) {
-                $one['is_like'] = 1;
-            }
-        }
-
-        $quote_ids = array_unique($quote_ids);
-        $quote_comments = [];
-        if ($quote_ids) {
-            $quote_comments = $this->_comment->getCommentsByIds($quote_ids);
-        }
-
-        foreach ($comments as &$one) {
-            if ($one['quote_id'] && $quote_comments) {
-                foreach ($quote_comments as $qone) {
-                    if ($one['quote_id'] == $qone['id']) {
-                        if ($qone['status'] != 1 && $qone['status'] != 3 && $qone['uid'] != $uid) {
-                            break;
-                        }
-                        $one['quote']['id'] = intval($qone['id']);
-                        $one['quote']['uid'] = intval($qone['uid']);
-                        $one['quote']['content'] = $qone['content'];
-                        break;
-                    }
-                }
-            }
         }
 
         $i = 1;
         $new_comments = [];
+        $service = new UserService();
+
         foreach ($comments as $piece) {
             if ($i > $limit) {
                 break;
             }
-            $new_comments[] = $piece;
+
+            $tmp = [
+                'cid' => $piece['id'],
+                'text' => $piece['content'],
+                'created_at' => strtotime($piece['created_at']),
+                'reply_comments' => [],
+            ];
+            $user = $service->getUserInfoById($piece['uid']);
+            if ($user) {
+                $author = [
+                    'uid' => $user['id'],
+                    'nickname' => $user['name'],
+                    'avatar_url' => $user['avatar'],
+                    // 'city' => $user['location'],
+                    'follow_status' => 0,
+                ];
+                $tmp['author'] = $author;
+            }
+            $new_comments[] = $tmp;
+
             $i ++;
         }
         $data = [
-            "comments" => $new_comments,
+            "list" => $new_comments,
             "has_more" => false,
         ];
         if (count($comments) > $limit) {
